@@ -23,7 +23,9 @@ public:
     vector3 apply(const vector3& p) const;
     void apply(vector3 *begin,vector3 *end) const;
     void apply(const vector3 *begin,const vector3 *end,vector3 *dst) const;
-    std::string to_string();
+    friend std::ostream& operator<<(std::ostream& os, const transformator& v);
+    transformator& operator=(const transformator& o);
+    std::string to_string() const;
 };
 }
 #endif

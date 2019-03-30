@@ -100,18 +100,31 @@ void transformator::apply(const vector3 *begin,const vector3 *end,vector3 *dst) 
     }
 }
 
-std::string transformator::to_string() {
+
+std::ostream& operator<<(std::ostream& os, const transformator& v) {
+    os << v.to_string();  
+    return os;  
+}
+
+transformator& transformator::operator=(const transformator& o) {
+    for(int i=0;i<4;i++)for(int j=0;j<4;j++)value[i][j]=o.value[i][j];
+    return *this;
+}
+
+std::string transformator::to_string() const {
     std::string ret;
     ret+= "[";
     for(int i=0;i<4;i++){
-        ret+=" [";
+        ret+="[";
         for(int j=0;j<4;j++){
-            ret+=" ";
             ret+=std::to_string(value[i][j]);
+            ret+=", ";
         }
-        ret+=" ]";
+        ret.pop_back();ret.pop_back();
+        ret+="], ";
     }
-    ret+=" ]";
+    ret.pop_back();ret.pop_back();
+    ret+="]";
     return ret;
 }
 };

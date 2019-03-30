@@ -16,6 +16,9 @@ class transformator;
 #include "vector4.h"
 #include "color_rgb.h"
 #include "transformator.h"
+#include "camera_transformator.h"
+#include "mesh.h"
+#include "set.h"
 
 
 #endif

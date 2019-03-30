@@ -3,7 +3,21 @@
 
 int main()
 {
-    gfx::vector3 g = gfx::vector3::random_inside_unit_sphere();
-    gfx::vector3 h = gfx::vector3::random_inside_unit_sphere().cross(g);
-    std::cout<<h.dot(g)<<std::endl;
+    gfx::set::mesh_pointer cube(new gfx::mesh(gfx::mesh::basic_shape::cube));
+    
+    gfx::set::set_pointer row(new gfx::set("row"));
+    
+    row->meshes.emplace_back(gfx::transformator::translate(-1,0,0),cube);
+    row->meshes.emplace_back(gfx::transformator::identity(),cube);
+    row->meshes.emplace_back(gfx::transformator::translate(1,0,0),cube);
+    
+    gfx::set::set_pointer grid(new gfx::set("grid"));
+    
+    grid->subsets.emplace_back(gfx::transformator::translate(0,-1,0),row);
+    grid->subsets.emplace_back(gfx::transformator::identity(),row);
+    grid->subsets.emplace_back(gfx::transformator::translate(0,1,0),row);
+    
+    grid->tree();
+    
+    std::cout<<grid->max_sub_vertices()<<std::endl;
 }
