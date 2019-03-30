@@ -1,28 +1,27 @@
 #ifndef _INCLUDE_TRANSFORMATOR_H_
 #define _INCLUDE_TRANSFORMATOR_H_
 
-class vector3;
+#include "gfx.h"
 
-class transformator//4x4 matrix
+class transformator
 {
-    typedef floating_point_type T;
 public:
-    T value[4][4];
-    typedef T value_type[4][4];
+    dtype value[4][4];
+    typedef dtype value_type[4][4];
     typedef const value_type& const_value_type_reference;
     transformator();
     
     static transformator identity();
-    static transformator scale(T r);
-    static transformator translate(T mx,T my,T mz);
-    static transformator rotate_x(T theta);
-    static transformator rotate_y(T theta);
-    static transformator rotate_z(T theta);
+    static transformator scale(dtype r);
+    static transformator translate(dtype mx,dtype my,dtype mz);
+    static transformator rotate_x(dtype theta);
+    static transformator rotate_y(dtype theta);
+    static transformator rotate_z(dtype theta);
     transformator& push_back(const transformator& a);
     transformator& push_front(const transformator& b);
     vector3 apply(const vector3& p) const;
     void apply(vector3 *begin,vector3 *end) const;
-    void apply(const vector3 *begin,const vector3 *end,vector3 *dst);
+    void apply(const vector3 *begin,const vector3 *end,vector3 *dst) const;
     std::string to_string();
 };
 
