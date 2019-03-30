@@ -1,9 +1,9 @@
 #ifndef _INCLUDE_VECTOR3_H_
 #define _INCLUDE_VECTOR3_H_
 
-#include "gfx.h"
 #include <iostream>
-
+#include "typedefs.h"
+namespace gfx{
 class vector3
 {
     
@@ -46,8 +46,8 @@ public:
     static dtype random_01();
     bool operator==(const vector3& o) const;
     bool operator!=(const vector3& o) const;
-    friend std::ostream& operator<<(std::ostream& os, const vector3& v) const ;
+    friend std::ostream& operator<<(std::ostream& os, const vector3& v);
     vector3& operator=(const vector3& o);
 };
-
+};
 #endif

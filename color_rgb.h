@@ -1,8 +1,10 @@
 #ifndef COLOR_RGB_H
 #define	COLOR_RGB_H
-#include "gfx.h"
-#include <iostream>
 
+#include "typedefs.h"
+#include "vector3.h"
+#include <iostream>
+namespace gfx{
 class color_rgb : public vector3
 {
 public:
@@ -21,5 +23,6 @@ public:
     const vector3& to_vec() const;
     color_rgb tonemap() const;
     friend std::ostream& operator<<(std::ostream& os, const color_rgb& v);
+};
 };
 #endif

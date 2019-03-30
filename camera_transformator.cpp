@@ -1,7 +1,7 @@
 #include "camera_transformator.h"
 #include <cstdlib>
 #include <cmath>
-
+namespace gfx{
 camera_transformator camera_transformator::scale(dtype r) {
         camera_transformator t;
         t.value[0][0]=t.value[1][1]=t.value[2][2]=t.value[3][3]=1/r;
@@ -63,4 +63,5 @@ camera_transformator& camera_transformator::push_front(const transformator& a) {
         value[3][j] = a.value[3][0] * b_0j + a.value[3][1] * b_1j + a.value[3][2] * b_2j + a.value[3][3] * b_3j;
     }
     return *this;
+};
 };

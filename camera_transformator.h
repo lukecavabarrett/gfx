@@ -1,8 +1,10 @@
 #ifndef _INCLUDE_CAMERA_TRANSFORMATOR_H_
 #define _INCLUDE_CAMERA_TRANSFORMATOR_H_
 
-#include "gfx.h"
-
+#include "typedefs.h"
+#include "vector3.h"
+#include "transformator.h"
+namespace gfx{
 class camera_transformator : public transformator
 {
 public:
@@ -14,5 +16,5 @@ public:
     camera_transformator& push_back(const transformator& a);
     camera_transformator& push_front(const transformator& a);
 };
-
+}
 #endif

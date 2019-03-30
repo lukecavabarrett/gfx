@@ -1,8 +1,9 @@
 #ifndef _INCLUDE_TRANSFORMATOR_H_
 #define _INCLUDE_TRANSFORMATOR_H_
 
-#include "gfx.h"
-
+#include "typedefs.h"
+#include "vector3.h"
+namespace gfx{
 class transformator
 {
 public:
@@ -24,5 +25,5 @@ public:
     void apply(const vector3 *begin,const vector3 *end,vector3 *dst) const;
     std::string to_string();
 };
-
+}
 #endif

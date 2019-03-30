@@ -1,7 +1,7 @@
 #include "vector3.h"
 #include <cstdlib>
 #include <cmath>
-
+namespace gfx{
 vector3::vector3() : x(0), y(0), z(0) {}
 vector3::vector3(dtype v) : x(v), y(v), z(v) {}
 vector3::vector3(dtype xp,dtype yp,dtype zp) : x(xp), y(yp), z(zp) {}
@@ -68,3 +68,4 @@ vector3& vector3::operator=(const vector3& o)
     x=o.x;y=o.y;z=o.z;
     return *this;
 }
+};

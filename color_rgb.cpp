@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <iomanip>
-
+namespace gfx{
 color_rgb::color_rgb (const vector3& v)
 {
     vector3::x=v.x;
@@ -22,7 +22,7 @@ int color_rgb::to_rgb() const
 
 color_rgb color_rgb::from_rgb(int w)
 {
-    return color_rgb(((dtype)((w>>16)&0xff))/255.0,((dtype)((w>>8)&0xff))/255.0,((dtype)(w&0xff))/255.0U);
+    return color_rgb(((dtype)((w>>16)&0xff))/255.0,((dtype)((w>>8)&0xff))/255.0,((dtype)(w&0xff))/255.0);
 }
 
 int color_rgb::to_rgb_le() const
@@ -46,4 +46,4 @@ std::ostream& operator<<(std::ostream& os, const color_rgb& v)
     os << '#' << std::setfill('0') << std::setw(6) << std::uppercase << std::hex << v.to_rgb();
     return os;
 }
-
+};

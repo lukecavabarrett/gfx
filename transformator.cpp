@@ -1,7 +1,7 @@
 #include "transformator.h"
 #include <cstdlib>
 #include <cmath>
-
+namespace gfx{
 transformator::transformator() : value {{1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1}} {};
 
 transformator transformator::identity() {
@@ -9,9 +9,9 @@ transformator transformator::identity() {
     return t;
 };
 
-transformator transformator::scale(dtype dtype) {
+transformator transformator::scale(dtype r) {
     transformator t;
-    t.value[0][0]=t.value[1][1]=t.value[2][2]=t.value[3][3]=dtype;
+    t.value[0][0]=t.value[1][1]=t.value[2][2]=t.value[3][3]=r;
     return t;
 };
 
@@ -114,3 +114,4 @@ std::string transformator::to_string() {
     ret+=" ]";
     return ret;
 }
+};
