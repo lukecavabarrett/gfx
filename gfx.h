@@ -19,6 +19,7 @@ class transformator;
 #include "camera_transformator.h"
 #include "mesh.h"
 #include "set.h"
+#include "render_engine.h"
 
 
 #endif
