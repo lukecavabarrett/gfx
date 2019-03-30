@@ -3,6 +3,9 @@
 
 typedef double dtype;
 
+#include "vector3.h"
+#include "color_rgb.h"
 #include "transformator.h"
+
 
 #endif

@@ -46,7 +46,7 @@ public:
     static dtype random_01();
     bool operator==(const vector3& o) const;
     bool operator!=(const vector3& o) const;
-    friend std::ostream& operator<<(std::ostream& os, const vector3& v);
+    friend std::ostream& operator<<(std::ostream& os, const vector3& v) const ;
     vector3& operator=(const vector3& o);
 };
 
