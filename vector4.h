@@ -3,6 +3,7 @@
 
 #include "typedefs.h"
 #include "vector3.h"
+#include "color_rgb.h"
 #include <iostream>
 namespace gfx{
 class vector4
@@ -35,6 +36,8 @@ public:
     vector4 operator/(dtype o) const ;
     void operator/=(dtype o);
     
+    vector3 xyz() const;
+    color_rgb rgb() const;
     int int_tonemap()  ;//TODO fix const
     dtype distance(const vector4& o) const ;
     dtype distance_sqr(const vector4& o) const ;
@@ -43,6 +46,7 @@ public:
     vector4 inverse() const ;
     vector4 normalised() const ;
     void normalise();
+    void swap(vector4& o);
     vector4 reflected_in(const vector4& n) const;
     static dtype random_01();
     bool operator==(const vector4& o) const;

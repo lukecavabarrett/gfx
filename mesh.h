@@ -11,7 +11,7 @@ class mesh
     static utype _id_mesh_counter_;
 public:
     
-    enum basic_shape {cube,sphere,tethraedron};//TODO implement just anything which is not the cube
+    enum basic_shape {triangle,cube,sphere,tethraedron};//TODO implement just anything which is not the cube
 
     //vertices
     utype n_vertices;

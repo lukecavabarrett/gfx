@@ -8,15 +8,22 @@
 #include "set.h"
 #include "sun_light.h"
 #include "mesh.h"
+#include "camera.h"
 
 namespace gfx{
 class render_engine{
 public:
     
+    static constexpr utype invalid_crd = -1;
     struct uvector2{
         utype y,x;
         uvector2() {}
         uvector2(utype py,utype px) : y(py), x(px) {}
+        void swap(uvector2& o){
+            utype t;
+            t=y;y=o.y;o.y=t;
+            t=x;x=o.x;o.x=t;
+        }
     };
     
     //buffers
@@ -44,10 +51,8 @@ public:
     inline void delete_buffers();
     
     //render!!!!!!
-    void render(const set::set_pointer scene,int *out_buffer,utype YRES,utype XRES,const transformator& camera,color_rgb ambient_light,const color_rgb &background_color,sun_light sun);
+    void render(const set::set_pointer scene,const camera& cam,color_rgb ambient_light,const color_rgb &background_color,sun_light sun);
 private:
-    inline void _render_scene_meshes(const set* grp,utype &YRES,utype &XRES,const transformator& camera,color_rgb &ambient_light,sun_light &sun);
-    inline void _render_mesh(const mesh& m,utype &YRES,utype &XRES,const transformator& T,color_rgb &ambient_light,sun_light &sun);//TODO
 };
 };
 
