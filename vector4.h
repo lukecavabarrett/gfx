@@ -2,6 +2,7 @@
 #define _INCLUDE_VECTOR4_H_
 
 #include "typedefs.h"
+#include "vector3.h"
 #include <iostream>
 namespace gfx{
 class vector4
@@ -13,7 +14,7 @@ public:
     vector4(dtype v);
     vector4(dtype xp,dtype yp,dtype zp,dtype wp);
     vector4(const vector4& o);
-    vector4(const vector4& o,dtype wp);
+    vector4(const vector3& o,dtype wp);
     dtype magnitude() const;
     
     vector4 operator+(const vector4& o) const ;
@@ -34,6 +35,7 @@ public:
     vector4 operator/(dtype o) const ;
     void operator/=(dtype o);
     
+    int int_tonemap()  ;//TODO fix const
     dtype distance(const vector4& o) const ;
     dtype distance_sqr(const vector4& o) const ;
     dtype dot(const vector4& o) const ;

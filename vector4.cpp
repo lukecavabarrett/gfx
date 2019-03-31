@@ -1,4 +1,5 @@
 #include "vector4.h"
+#include "color_rgb.h"
 #include <cstdlib>
 #include <cmath>
 namespace gfx{
@@ -6,6 +7,7 @@ vector4::vector4() : x(0), y(0), z(0), w(0) {}
 vector4::vector4(dtype v) : x(v), y(v), z(v), w(v) {}
 vector4::vector4(dtype xp,dtype yp,dtype zp,dtype wp) : x(xp), y(yp), z(zp), w(wp) {}
 vector4::vector4(const vector4& o) : x(o.x), y(o.y), z(o.z), w(o.z) {}
+vector4::vector4(const vector3& o,dtype wp) : x(o.x), y(o.y), z(o.z), w(wp) {}
 
 dtype vector4::magnitude() const {return std::sqrt(x*x+y*y+z*z+w*w);}
 vector4 vector4::operator+(const vector4& o) const {return vector4(x+o.x,y+o.y,z+o.z,w+o.w);}
@@ -26,6 +28,7 @@ void vector4::operator*=(dtype o){x*=o;y*=o;z*=o;w*=o;}
 vector4 vector4::operator/(dtype o) const {return vector4(x/o,y/o,z/o,w/o);}
 void vector4::operator/=(dtype o){x/=o;y/=o;z/=o;w/=o;}
 
+int vector4::int_tonemap() {return color_rgb(x,y,z).tonemap().to_rgb();}
 dtype vector4::distance(const vector4& o) const {return std::sqrt((x-o.x)*(x-o.x)+(y-o.y)*(y-o.y)+(z-o.z)*(z-o.z)+(w-o.w)*(w-o.w));}
 dtype vector4::distance_sqr(const vector4& o) const {return (x-o.x)*(x-o.x)+(y-o.y)*(y-o.y)+(z-o.z)*(z-o.z)+(w-o.w)*(w-o.w);}
 dtype vector4::dot(const vector4& o) const {return x*o.x+y*o.y+z*o.z+w*o.w;}

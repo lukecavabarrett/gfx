@@ -4,6 +4,16 @@
 namespace gfx{
 transformator::transformator() : value {{1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1}} {};
 
+transformator::transformator(const transformator& a,const transformator& b) {
+    for(int i=0;i<4;i++){
+        dtype a_i0 = a.value[i][0], a_i1 = a.value[i][1], a_i2 = a.value[i][2], a_i3 = a.value[i][3];
+        value[i][0] = a_i0 * b.value[0][0] + a_i1 * b.value[1][0] + a_i2 * b.value[2][0] + a_i3 * b.value[3][0];
+        value[i][1] = a_i0 * b.value[0][1] + a_i1 * b.value[1][1] + a_i2 * b.value[2][1] + a_i3 * b.value[3][1];
+        value[i][2] = a_i0 * b.value[0][2] + a_i1 * b.value[1][2] + a_i2 * b.value[2][2] + a_i3 * b.value[3][2];
+        value[i][3] = a_i0 * b.value[0][3] + a_i1 * b.value[1][3] + a_i2 * b.value[2][3] + a_i3 * b.value[3][3];
+    }
+}
+
 transformator transformator::identity() {
     transformator t;
     return t;

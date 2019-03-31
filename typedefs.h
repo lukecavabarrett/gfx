@@ -7,6 +7,7 @@ namespace gfx{
     
 typedef double dtype;
 typedef uint32_t utype;
+typedef int stype;
 
 };
 #endif

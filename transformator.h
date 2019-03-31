@@ -11,6 +11,7 @@ public:
     typedef dtype value_type[4][4];
     typedef const value_type& const_value_type_reference;
     transformator();
+    transformator(const transformator& a,const transformator& b);
     
     static transformator identity();
     static transformator scale(dtype r);

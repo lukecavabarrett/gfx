@@ -48,7 +48,9 @@ void set::tree() const {
     }
 }
 
-set::~set() {}
+set::~set() {
+    
+}
 
 utype set::count_sub_subsets() const {
     utype c=subsets.size();
