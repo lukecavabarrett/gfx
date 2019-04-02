@@ -1,47 +1,34 @@
-#include "render_engine.h"
+#include "render_engine_parallel.h"
 #include <stack>
 #include <limits>
 #include <cassert>
 #include <omp.h>
 
 //#define _BOUNDING_BOXES_ 1
-#define _PARALLEL_FRAGMENT_SHADING_
-#define _PARALLEL_Z_BUFFER_INITIALIZATION_
-#define _PARALLEL_FINAL_FILL
 
 namespace gfx{
-    
-render_engine::render_engine() {}
-render_engine::render_engine(utype vbuf) {resize_vertex(vbuf);}
-render_engine::render_engine(utype height,utype width) {resize_rgbz(height,width);}
-render_engine::render_engine(utype height,utype width, utype vbuf) {resize_rgbz(height,width);resize_vertex(vbuf);}
-render_engine::~render_engine() {delete_buffers();}
+
+render_engine_parallel::render_engine_parallel(utype width,utype height) : YRES(height),XRES(width),YXRES(height*width),T(omp_get_max_threads()) {
+    for(int i=0;i<T;i++)rgbz_buffer[i]=new vector4 [YXRES];
+    utype chunksize=YXRES/T;
+    std::cout<<T<<" threads available"<<std::endl;
+    _end[0]=chunksize;
+    for(int i=1;i<T;i++){_start[i]=_end[i-1];_end[i]=_start[i]+chunksize;}
+    _end[T-1]=YXRES;
+}
+render_engine_parallel::render_engine_parallel(utype width,utype height, utype vbuf)  : YRES(height),XRES(width),YXRES(height*width),T(omp_get_max_threads()) {
+    for(int i=0;i<T;i++)rgbz_buffer[i]=new vector4 [YXRES];
+    resize_vertex(vbuf);
+    std::cout<<T<<" threads available"<<std::endl;
+    utype chunksize=YXRES/T;
+    _end[0]=chunksize;
+    for(int i=1;i<T;i++){_start[i]=_end[i-1];_end[i]=_start[i]+chunksize;}
+    _end[T-1]=YXRES;
+}
+render_engine_parallel::~render_engine_parallel() {delete_vertex();for(int i=0;i<T;i++)delete[] rgbz_buffer[i];}
 
 //buffer handling
-void render_engine::resize_rgbz(utype size){
-    delete_rgbz();
-    if(size>0){
-        rgbz_buffer = new vector4 [size];
-        rgbz_buffer_size = size;
-    }
-}
-void render_engine::resize_rgbz(utype height,utype width){
-    resize_rgbz(height*width);
-}
-void render_engine::upsize_rgbz(utype size){
-    if(size>rgbz_buffer_size)resize_rgbz(size);
-}
-void render_engine::upsize_rgbz(utype height,utype width) {
-    upsize_rgbz(height*width);
-}
-
-void render_engine::delete_rgbz(){
-    if(rgbz_buffer_size)delete[] rgbz_buffer;
-    rgbz_buffer=nullptr;
-    rgbz_buffer_size=0;
-}
-
-void render_engine::resize_vertex(utype size){
+void render_engine_parallel::resize_vertex(utype size){
     delete_vertex();
     if(size>0){
         vertex_buffer = new vector4 [size];
@@ -49,46 +36,17 @@ void render_engine::resize_vertex(utype size){
         vertex_buffer_size = size;
     }
 }
-void render_engine::upsize_vertex(utype size){
+void render_engine_parallel::upsize_vertex(utype size){
     if(size>vertex_buffer_size)resize_vertex(size);
 }
-void render_engine::delete_vertex() {
+void render_engine_parallel::delete_vertex() {
     if(vertex_buffer_size){delete[] vertex_buffer;delete[] vertex_screen_buffer;}
     vertex_buffer=nullptr;
     vertex_screen_buffer=nullptr;
     vertex_buffer_size=0;
 }
 
-void render_engine::delete_buffers() {
-    if(rgbz_buffer_size)delete[] rgbz_buffer;
-    if(vertex_buffer_size){delete[] vertex_buffer;delete[] vertex_screen_buffer;}
-    rgbz_buffer=vertex_buffer=nullptr;
-    vertex_screen_buffer=nullptr;
-    rgbz_buffer_size=vertex_buffer_size=0;
-}
-
-/*
-inline void render_engine::_render_mesh(const mesh& m,const transformator& T,const camera& cam,color_rgb &ambient_light,sun_light &sun){
-    //TODO
-    //std::cerr<<"rendering "<<m.name<<" with "<<T<<std::endl;
-    
-    //vertex shading
-    {
-        vector3 *v=m.v,*vn=m.vn,*vc=m.vc;
-        vector4 *rgbz=vertex_buffer;
-        uvector2 *yx=vertex_screen_buffer;
-        //parallel
-        for(int NV=m.n_vertices;NV--;v++,vn++,vc++,rgbz++,yx++)
-        {
-            //camera coord TODO
-            vector3 cv=T.apply(*v),
-            cvn=T.apply(*vn);cvn-=cv;cvn.normalise();
-            *rgbz=vector4(*vc*(ambient_light+sun.color*sun.vector.dot(cvn)),cv.z);
-        }
-    }
-}*/
-
-void render_engine::render(const set::set_pointer scene,const camera& cam,color_rgb ambient_light,const color_rgb &background_color,sun_light sun) {
+void render_engine_parallel::render(const set::set_pointer scene,const camera& cam,color_rgb ambient_light,const color_rgb &background_color,sun_light sun) {
 
 //makes camera invertible so that we can remove it from sunlight
     sun.vector=cam.inverse.apply(sun.vector);
@@ -98,25 +56,13 @@ void render_engine::render(const set::set_pointer scene,const camera& cam,color_
     dtype mult_factor = ((dtype)YRES)/cam_h;
 //enlarge buffers if needed
     utype YXRES = YRES*XRES;
-    
-    upsize_rgbz(YXRES);
     upsize_vertex(scene->max_sub_vertices());
 //initialize rgbz buffer
-#ifdef _PARALLEL_Z_BUFFER_INITIALIZATION_
     #pragma omp parallel
     {   
-        utype tid = omp_get_thread_num();
-        utype chunksize = YXRES / omp_get_num_threads();
-        vector4 *begin = rgbz_buffer + chunksize * tid;
-        vector4 *end = (tid == omp_get_num_threads() -1) ? rgbz_buffer+YXRES : begin + chunksize;
-        std::fill(begin, end, vector4(background_color,std::numeric_limits<dtype>::infinity()));
+        utype t_id = omp_get_thread_num();
+        std::fill(rgbz_buffer[t_id],rgbz_buffer[t_id]+YXRES,vector4(background_color,std::numeric_limits<dtype>::infinity()));
     }
-    
-    //std::fill(rgbz_buffer,rgbz_buffer+YXRES,vector4(background_color,std::numeric_limits<dtype>::infinity()));
-#else
-
-    std::fill(rgbz_buffer,rgbz_buffer+YXRES,vector4(background_color,std::numeric_limits<dtype>::infinity()));
-#endif
 //process queue
 
     struct process_node{
@@ -144,31 +90,30 @@ void render_engine::render(const set::set_pointer scene,const camera& cam,color_
                 vector4 *rgbz=vertex_buffer;
                 uvector2 *yx=vertex_screen_buffer;
 
-                for(int NV=m.n_vertices;NV--;++v,++vn,++vc,++rgbz,++yx)
+                //for(int NV=m.n_vertices;NV--;++v,++vn,++vc,++rgbz,++yx)
+                int NV=m.n_vertices;
+                #pragma omp parallel for
+                for(int i=0;i<NV;i++)
                 {
-                    vector3 cv=T.apply(*v);
-                    if(cv.z<near_clipping || cv.z>far_clipping){*yx={invalid_crd,invalid_crd};}
+                    vector3 cv=T.apply(v[i]);
+                    if(omp_get_thread_num()==0)std::cout<<cv<<" "<<near_clipping<<" "<<far_clipping<<std::endl;
+                    if(cv.z<near_clipping || cv.z>far_clipping){yx[i]={invalid_crd,invalid_crd};continue;}
+                    putc('.',stderr);
                     vector3 fv(cv.x*near_clipping/cv.z + cam_w/2,cv.y*near_clipping/cv.z + cam_h/2,cv.z);
-                    if(fv.x<0 || fv.x>=cam_w || fv.y<0 || fv.y>=cam_h){*yx={invalid_crd,invalid_crd};continue;}
-                    *yx={(utype)(fv.y*mult_factor),(utype)(fv.x*mult_factor)}; assert(yx->y>=0 && yx->y<YRES && yx->x>=0 && yx->x<XRES);    
-                    vector3 cvn=T.apply(*vn);cvn-=cv;cvn.normalise();
-                    *rgbz=vector4((*vc)*(ambient_light+sun.color*std::max<dtype>(sun.vector.dot(cvn),0)),cv.z);
-                    //putc('.',stderr);
+                    if(fv.x<0 || fv.x>=cam_w || fv.y<0 || fv.y>=cam_h){yx[i]={invalid_crd,invalid_crd};continue;}
+                    yx[i]={(utype)(fv.y*mult_factor),(utype)(fv.x*mult_factor)}; assert(yx->y>=0 && yx->y<YRES && yx->x>=0 && yx->x<XRES);    
+                    vector3 cvn=T.apply(vn[i]);cvn-=cv;cvn.normalise();
+                    rgbz[i]=vector4(vc[i]*(ambient_light+sun.color*std::max<dtype>(sun.vector.dot(cvn),0)),cv.z);
                 }
                 //triangles shading
                 mesh::utype3* ids=m.t;
                 
-#ifdef _PARALLEL_FRAGMENT_SHADING_
                 int NT=m.n_triangles;
                 #pragma omp parallel for
                 for(int i=0;i<NT;i++)
                 {
+                    utype t_id = omp_get_thread_num();
                     utype i0=m.t[i].i0,i1=m.t[i].i1,i2=m.t[i].i2;
-#else
-                for(int NT=m.n_triangles;NT--;++ids)
-                {
-                    utype i0=ids->i0,i1=ids->i1,i2=ids->i2;
-#endif
                     uvector2 yx0=vertex_screen_buffer[i0],yx1=vertex_screen_buffer[i1],yx2=vertex_screen_buffer[i2];
                     if(yx0.x==invalid_crd || yx1.x==invalid_crd || yx2.x==invalid_crd)continue;
                     //if inverted, remove it
@@ -221,7 +166,7 @@ void render_engine::render(const set::set_pointer scene,const camera& cam,color_
                             //(0->1)(0->2);
                             dtype dsx=yx0.x,dex=yx0.x;
                             utype usx=yx0.x;vector4 csx=rgbz0;
-                            vector4 *vsb=rgbz_buffer+yx0.y*XRES+usx;
+                            vector4 *vsb=rgbz_buffer[t_id]+yx0.y*XRES+usx;
                             for(int y=yx0.y;y<=yx1.y;y++,dsx+=dx1,dex+=dx2,csx+=drgbz_y,vsb+=XRES)
                             {
                                 //shift u
@@ -242,9 +187,10 @@ void render_engine::render(const set::set_pointer scene,const camera& cam,color_
                             //(1->2)(0->2);
                             dtype dx12=(dtype)((int)yx2.x-(int)yx1.x)/((int)yx2.y-(int)yx1.y);
                             dsx=yx1.x;
-                            usx=yx1.x;
                             csx=rgbz1;
-                            vsb=rgbz_buffer+yx1.y*XRES+usx;
+                            //TODO: remove following two lines, maybe unnecessary
+                            usx=yx1.x;
+                            vsb=rgbz_buffer[t_id]+yx1.y*XRES+usx;
                             for(int y=yx1.y;y<=yx2.y;y++,dsx+=dx12,dex+=dx2,csx+=drgbz_y,vsb+=XRES)
                             {
                                 //shift u
@@ -279,7 +225,7 @@ void render_engine::render(const set::set_pointer scene,const camera& cam,color_
                             //(0->1)(0->2);
                             dtype dsx=yx0.x,dex=yx0.x;
                             utype usx=yx0.x;vector4 csx=rgbz0;
-                            vector4 *vsb=rgbz_buffer+yx0.y*XRES+usx;
+                            vector4 *vsb=rgbz_buffer[t_id]+yx0.y*XRES+usx;
                             for(int y=yx0.y;y<=yx2.y;y++,dsx+=dx1,dex+=dx2,csx+=drgbz_y,vsb+=XRES)
                             {
                                 
@@ -335,23 +281,23 @@ void render_engine::render(const set::set_pointer scene,const camera& cam,color_
         }
     }
 
-    
+    /*int *c_buf=cam.video_buffer;
 //translate rgbz_buffer on out_buffer
-#ifdef _PARALLEL_FINAL_FILL
     #pragma omp parallel
     {   
-        utype tid = omp_get_thread_num();
-        utype chunksize = YXRES / omp_get_num_threads();
-        vector4 *begin = rgbz_buffer + chunksize * tid;
-        int *out = cam.video_buffer + chunksize * tid;
-        vector4 *end = (tid == omp_get_num_threads() -1) ? rgbz_buffer+YXRES : begin + chunksize;
-        for(;begin!=end;++begin,++out)*out=begin->int_tonemap();
-    }
-#else
+        utype t_id = omp_get_thread_num();
+        utype s=_start[t_id],e=_end[t_id];
+        int *out_buffer=c_buf+s;
+        for(int i=s;i<e;i++,out_buffer++)
+        {
+            int n=0;
+            for(int j=1;j<T;j++)if(rgbz_buffer[j][i].w<rgbz_buffer[n][i].w)n=j;
+            *out_buffer=rgbz_buffer[n][i].int_tonemap();
+        }
+        printf("%d done!\n",t_id);
+    }*/
     int *out_buffer=cam.video_buffer;
-    for(vector4* v=rgbz_buffer;YXRES--;++v,++out_buffer)*out_buffer=v->int_tonemap();
-#endif
-    
+    for(vector4* v=rgbz_buffer[0];YXRES--;++v,++out_buffer)*out_buffer=v->int_tonemap();
     
 }
     

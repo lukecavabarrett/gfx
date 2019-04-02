@@ -32,6 +32,7 @@ dtype vector3::dot(const vector3& o) const {return x*o.x+y*o.y+z*o.z;}
 vector3 vector3::cross(const vector3& o) const {return vector3(y*o.z-z*o.y,z*o.x-x*o.z,x*o.y-y*o.x);}
 vector3 vector3::power(dtype o) const {return vector3(std::pow(x,o),std::pow(y,o),std::pow(z,o));}
 vector3 vector3::inverse() const {return vector3(1/x,1/y,1/z);}
+vector3 vector3::relu() const {return vector3(x<0?0:x,y<0?0:y,z<0?0:z);}
 vector3 vector3::normalised() const {dtype m=magnitude();return vector3(x/m,y/m,z/m);}
 void vector3::normalise(){dtype m=magnitude();x/=m;y/=m;z/=m;}
 

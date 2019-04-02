@@ -23,6 +23,9 @@ public:
     camera& rotate_x(dtype theta);
     camera& rotate_y(dtype theta);
     camera& rotate_z(dtype theta);
+    camera& rotate_x_about_origin(dtype theta);
+    camera& rotate_y_about_origin(dtype theta);
+    camera& rotate_z_about_origin(dtype theta);
     
     //friend std::ostream& operator<<(std::ostream& os, const transformator& v);
     transformator& operator=(const transformator& o);

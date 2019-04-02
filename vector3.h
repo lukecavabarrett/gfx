@@ -39,6 +39,7 @@ public:
     vector3 cross(const vector3& o) const ;
     vector3 power(dtype o) const ;
     vector3 inverse() const ;
+    vector3 relu() const ;
     vector3 normalised() const ;
     void normalise();
     vector3 reflected_in(const vector3& n) const;

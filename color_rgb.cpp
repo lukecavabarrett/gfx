@@ -37,7 +37,7 @@ const vector3& color_rgb::to_vec() const
 
 color_rgb color_rgb::tonemap() const
 {
-    vector3 powRGB = to_vec().power(g_b);
+    vector3 powRGB = to_vec().relu().power(g_b);
     return color_rgb((powRGB*((powRGB+std::pow(0.5/g_a,g_b)).inverse())).power(inv_gamma));
 }
 

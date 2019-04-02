@@ -20,6 +20,7 @@ class transformator;
 #include "mesh.h"
 #include "set.h"
 #include "render_engine.h"
+#include "render_engine_parallel.h"
 #include "sun_light.h"
 
 

@@ -36,27 +36,27 @@ transformator transformator::translate(dtype mx,dtype my,dtype mz) {
 transformator transformator::rotate_x(dtype theta) {
     transformator t;
     dtype c = std::cos(theta), s = std::sin(theta);
-    t.value[1][1]=c;t.value[1][2]=s;
-    t.value[2][1]=-s;t.value[2][2]=c;
-    //t.value = {{1,0,0,0},{0,c,s,0},{0,-s,c,0},{0,0,0,1}};
+    t.value[1][1]=c;t.value[1][2]=-s;
+    t.value[2][1]=s;t.value[2][2]=c;
+    //t.value = {{1,0,0,0},{0,c,-s,0},{0,s,c,0},{0,0,0,1}};
     return t;
 };
 
 transformator transformator::rotate_y(dtype theta) {
     transformator t;
     dtype c = std::cos(theta), s = std::sin(theta);
-    t.value[0][0]=c;t.value[0][2]=-s;
-    t.value[2][0]=s;t.value[2][2]=c;
-    //t.value = {{c,0,-s,0},{0,1,0,0},{s,0,c,0},{0,0,0,1}};
+    t.value[0][0]=c;t.value[0][2]=s;
+    t.value[2][0]=-s;t.value[2][2]=c;
+    //t.value = {{c,0,s,0},{0,1,0,0},{-s,0,c,0},{0,0,0,1}};
     return t;
 };
 
 transformator transformator::rotate_z(dtype theta) {
     transformator t;
     dtype c = std::cos(theta), s = std::sin(theta);
-    t.value[0][0]=c;t.value[0][1]=s;
-    t.value[1][0]=-s;t.value[1][1]=c;
-    //t.value = {{c,s,0,0},{-s,c,0,0},{0,0,1,0},{0,0,0,1}};
+    t.value[0][0]=c;t.value[0][1]=-s;
+    t.value[1][0]=s;t.value[1][1]=c;
+    //t.value = {{c,-s,0,0},{s,c,0,0},{0,0,1,0},{0,0,0,1}};
     return t;
 };
 
